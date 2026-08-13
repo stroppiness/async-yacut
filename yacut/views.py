@@ -84,16 +84,19 @@ async def get_upload_url(session, filename):
 
 
 async def upload_file(session, file, upload_url):
+    file.stream.seek(0)
+    data = file.stream.read()
+
     async with session.put(
         upload_url,
-        data=file.stream,
+        data=data,
         headers=AUTH_HEADERS,
     ) as response:
         response.raise_for_status()
 
         return {
             'filename': file.filename,
-            'location': response.headers['Location'],
+            'location': response.headers.get('Location'),
         }
 
 
