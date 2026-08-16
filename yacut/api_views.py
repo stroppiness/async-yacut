@@ -1,20 +1,20 @@
+from http import HTTPStatus
 from flask import jsonify, request
 
 from . import app
-from .constants import CUSTOM_ID_PARAMS
+from .constants import CUSTOM_ID_PARAMS, USER_MAX__URL_LENGTH
 from .error_handlers import InvalidAPIError
 from .models import URLMap
-from .views import get_unique_short_id
 
 
 @app.route('/api/id/<string:short_id>/', methods=['GET'])
-def get_original_link(short_id):
-    urlmap = URLMap.query.filter_by(short=short_id).first()
+def get_original_link_by_id(short_id):
+    urlmap = URLMap.get_short_id_from_db(short_id)
 
     if urlmap is None:
-        raise InvalidAPIError('Указанный id не найден', 404)
+        raise InvalidAPIError('Указанный id не найден', HTTPStatus.NOT_FOUND)
 
-    return jsonify({'url': urlmap.original}), 200
+    return jsonify({'url': urlmap.original}), HTTPStatus.OK
 
 
 @app.route('/api/id/', methods=['POST'])
@@ -29,16 +29,13 @@ def create_link():
 
     custom_id = data.get('custom_id')
     if custom_id:
-        if len(custom_id) > 16 or not CUSTOM_ID_PARAMS.fullmatch(custom_id):
+        if (len(custom_id) > USER_MAX__URL_LENGTH or not
+                CUSTOM_ID_PARAMS.fullmatch(custom_id)):
             raise InvalidAPIError(
                 'Указано недопустимое имя для короткой ссылки')
 
-    short_id = get_unique_short_id(data['url'], custom_id or None)
+    short_id = URLMap.get_unique_short_id(data['url'], custom_id or None)
 
-    if short_id is None:
-        raise InvalidAPIError(
-            'Предложенный вариант короткой ссылки уже существует.')
+    urlmap = URLMap.get_short_id_from_db(short_id)
 
-    urlmap = URLMap.query.filter_by(short=short_id).first()
-
-    return jsonify(urlmap.to_dict()), 201
+    return jsonify(urlmap.to_dict()), HTTPStatus.CREATED

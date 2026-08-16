@@ -4,40 +4,12 @@ import random
 import aiohttp
 from flask import flash, redirect, render_template, url_for
 
-from . import app, db
-from .constants import AUTH_HEADERS, DOWNLOAD_LINK_URL, REQUEST_UPLOAD_URL
+from . import app
+from .constants import (AUTH_HEADERS, DOWNLOAD_LINK_URL,
+                        REQUEST_UPLOAD_URL, FORBIDDEN_URL_NAME)
 from .forms import YacutForm, YacutUploadForm
 from .models import URLMap
-
-
-def get_unique_short_id(original_link, custom=None):
-    symbols = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-
-    if custom == 'files':
-        flash('Предложенный вариант короткой ссылки уже существует.')
-        return None
-
-    if custom is None:
-        short_id = ''.join(random.choices(symbols, k=6))
-
-        if URLMap.query.filter_by(short=short_id).first():
-            return get_unique_short_id(original_link)
-
-    else:
-        short_id = custom
-
-        if URLMap.query.filter_by(short=short_id).first():
-            flash('Предложенный вариант короткой ссылки уже существует.')
-            return None
-
-    new_data = URLMap(
-        original=original_link,
-        short=short_id,
-    )
-    db.session.add(new_data)
-    db.session.commit()
-
-    return short_id
+from.error_handlers import InvalidAPIError
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -46,11 +18,22 @@ def index_view():
     short_link = None
 
     if form.validate_on_submit():
+        try:
+            short_link = URLMap.get_unique_short_id(
+                form.original_link.data,
+                form.custom_id.data or None,
+            )
 
-        short_link = get_unique_short_id(
-            form.original_link.data,
-            form.custom_id.data or None,
-        )
+        except InvalidAPIError as error:
+            flash(error.message)
+            return render_template('index.html', form=form)
+
+        except Exception:
+            flash(
+                'Произошёл непредвиденный сбой при создании ссылки. '
+                'Попробуйте позже'
+            )
+            return render_template('index.html', form=form)
 
     return render_template(
         'index.html',
@@ -149,7 +132,7 @@ async def files_upload_view():
             upload_results,
             download_urls,
         ):
-            short_id = get_unique_short_id(download_url)
+            short_id = URLMap.get_unique_short_id(download_url)
 
             results.append({
                 'filename': result['filename'],
