@@ -3,7 +3,7 @@ from flask import jsonify, request
 
 from . import app
 from .constants import CUSTOM_ID_PARAMS, USER_MAX__URL_LENGTH
-from .error_handlers import InvalidAPIError
+from .error_handlers import InvalidAPIError, ShortIDAlreadyExistsError
 from .models import URLMap
 
 
@@ -34,8 +34,10 @@ def create_link():
             raise InvalidAPIError(
                 'Указано недопустимое имя для короткой ссылки')
 
-    short_id = URLMap.get_unique_short_id(data['url'], custom_id or None)
-
-    urlmap = URLMap.get_short_id_from_db(short_id)
+    try:
+        urlmap = URLMap.get_unique_short_id(data['url'], custom_id or None)
+    except ShortIDAlreadyExistsError:
+        raise InvalidAPIError(
+            'Предложенный вариант короткой ссылки уже существует.')
 
     return jsonify(urlmap.to_dict()), HTTPStatus.CREATED

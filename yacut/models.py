@@ -7,7 +7,7 @@ from yacut import db
 
 from .constants import (URL_MAX_LENGTH, SYMBOLS, MAX_ITERATIONS,
                         FORBIDDEN_URL_NAME, MAX_SHORT_URL_LENGTH)
-from .error_handlers import InvalidAPIError
+from .error_handlers import (URLCreationError, ShortIDAlreadyExistsError)
 
 
 class URLMap(db.Model):
@@ -56,27 +56,20 @@ class URLMap(db.Model):
     def get_unique_short_id(cls, original_link, custom=None):
 
         if custom is None:
-            short_id = ''.join(random.choices(SYMBOLS,
-                                              k=MAX_SHORT_URL_LENGTH))
-
-            if cls.get_short_id_from_db(short_id):
-                short_id = cls.unique_custom_id_regeneration()
-
+            short_id = cls.unique_custom_id_generation()
         else:
             short_id = custom
 
             if (cls.get_short_id_from_db(short_id)
                or short_id in FORBIDDEN_URL_NAME):
-                raise InvalidAPIError(
-                    'Предложенный вариант короткой ссылки уже существует.'
-                )
+                raise ShortIDAlreadyExistsError()
 
-        cls.db_object_creation(original_link, short_id)
+        new_short_id = cls.db_object_creation(original_link, short_id)
 
-        return short_id
+        return new_short_id
 
     @classmethod
-    def unique_custom_id_regeneration(cls):
+    def unique_custom_id_generation(cls):
         for _ in range(MAX_ITERATIONS):
             short_id = ''.join(
                 random.choices(SYMBOLS,
@@ -85,6 +78,4 @@ class URLMap(db.Model):
             if not cls.get_short_id_from_db(short_id):
                 return short_id
 
-        raise InvalidAPIError(
-            'Не удалось создать уникальную короткую ссылку.'
-        )
+        raise URLCreationError()

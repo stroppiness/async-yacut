@@ -8,23 +8,23 @@ from .constants import (AUTH_HEADERS, DOWNLOAD_LINK_URL,
                         REQUEST_UPLOAD_URL)
 from .forms import YacutForm, YacutUploadForm
 from .models import URLMap
-from .error_handlers import InvalidAPIError
+from .error_handlers import InvalidAPIError, ShortIDAlreadyExistsError
 
 
 @app.route('/', methods=['GET', 'POST'])
 def index_view():
     form = YacutForm()
-    short_link = None
+    urlmap = None
 
     if form.validate_on_submit():
         try:
-            short_link = URLMap.get_unique_short_id(
+            urlmap = URLMap.get_unique_short_id(
                 form.original_link.data,
                 form.custom_id.data or None,
             )
 
-        except InvalidAPIError as error:
-            flash(error.message)
+        except ShortIDAlreadyExistsError:
+            flash('Предложенный вариант короткой ссылки уже существует.')
             return render_template('index.html', form=form)
 
         except Exception:
@@ -37,8 +37,8 @@ def index_view():
     return render_template(
         'index.html',
         short_link=(
-            url_for('redirect_view', short_id=short_link, _external=True)
-            if short_link else None
+            url_for('redirect_view', short_id=urlmap.short, _external=True)
+            if urlmap else None
         ),
         form=form,
     )

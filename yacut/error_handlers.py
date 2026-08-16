@@ -17,6 +17,14 @@ class InvalidAPIError(Exception):
         return dict(message=self.message)
 
 
+class ShortIDAlreadyExistsError(Exception):
+    pass
+
+
+class URLCreationError(Exception):
+    pass
+
+
 @app.errorhandler(InvalidAPIError)
 def invalid_api_usage(error):
     return jsonify(error.to_dict()), error.status_code

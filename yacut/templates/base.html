@@ -29,26 +29,26 @@
       rel="stylesheet"
       href="{{ url_for('static', filename='css/bootstrap.min.css') }}"
     />
-    <title>{% block title %}YaCut - укоротитель ссылок{% endblock %}</title>
+    <title>
+      {% block title %}
+      YaCut - укоротитель ссылок
+      {% endblock %}
+    </title>
   </head>
 
   <body>
     {% include 'header.html' %}
 
-    <main>{% block content %}{% endblock %}</main>
+    <main>
+      {% block content %}
+      {% endblock %}
+    </main>
 
     {% include 'footer.html' %}
 
-    <script
-      src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
-      integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
-      integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
-      crossorigin="anonymous"
-    ></script>
-    {% block scripts %}{% endblock %}
+    <script src="{{ url_for('static', filename='js/jquery.slim.min.js') }}"></script> 
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    {% block scripts %}
+    {% endblock %}
   </body>
 </html>
