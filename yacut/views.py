@@ -1,15 +1,14 @@
 import asyncio
-import random
 
 import aiohttp
 from flask import flash, redirect, render_template, url_for
 
 from . import app
 from .constants import (AUTH_HEADERS, DOWNLOAD_LINK_URL,
-                        REQUEST_UPLOAD_URL, FORBIDDEN_URL_NAME)
+                        REQUEST_UPLOAD_URL)
 from .forms import YacutForm, YacutUploadForm
 from .models import URLMap
-from.error_handlers import InvalidAPIError
+from .error_handlers import InvalidAPIError
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -53,7 +52,7 @@ def redirect_view(short_id):
 
 async def get_upload_url(session, filename):
     params = {
-        'path': f'app:/{filename}',
+        'path': f'app: /{filename}',
         'overwrite': 'True',
     }
 
@@ -122,7 +121,7 @@ async def files_upload_view():
                 *(
                     get_download_url(
                         session,
-                        f'app:/{file.filename}',
+                        f'app: /{file.filename}',
                     )
                     for file in files
                 )

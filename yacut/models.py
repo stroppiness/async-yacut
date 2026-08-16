@@ -1,7 +1,7 @@
 import datetime
 import random
 
-from flask import url_for, flash
+from flask import url_for
 
 from yacut import db
 
