@@ -8,7 +8,7 @@ from .constants import (AUTH_HEADERS, DOWNLOAD_LINK_URL,
                         REQUEST_UPLOAD_URL)
 from .forms import YacutForm, YacutUploadForm
 from .models import URLMap
-from .error_handlers import InvalidAPIError, ShortIDAlreadyExistsError
+from .error_handlers import ShortIDAlreadyExistsError
 
 
 @app.route('/', methods=['GET', 'POST'])
