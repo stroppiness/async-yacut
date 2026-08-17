@@ -80,4 +80,6 @@ class URLMap(db.Model):
             if not cls.get_short_id_from_db(short_id):
                 return short_id
 
-        raise URLCreationError('Не удалось сгенерировать уникальную короткую ссылку')
+        raise URLCreationError(
+            'Не удалось сгенерировать уникальную короткую ссылку'
+        )
