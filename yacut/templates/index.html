@@ -49,19 +49,18 @@
   </div>
 
   {% if short_link %}
-  <div class="container">
-    <div class="row">
-      <div class="col-sm"></div>
-      <div class="col-sm">
-        <p class="text-center">
-          <a href="{{ short_link }}" target="_blank" rel="noopener noreferrer"
-            >{{ short_link }}</a
-          >
-        </p>
+    <div class="container">
+      <div class="row">
+        <div class="col-sm"></div>
+        <div class="col-sm">
+          <p class="text-center">
+            <a href="{{ short_link }}" target="_blank" rel="noopener noreferrer"
+            >{{ short_link }}</a>
+          </p>
+        </div>
+        <div class="col-sm"></div>
       </div>
-      <div class="col-sm"></div>
     </div>
-  </div>
   {% endif %}
 </section>
 {% endblock %}

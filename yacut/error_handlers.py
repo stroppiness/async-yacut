@@ -18,11 +18,17 @@ class InvalidAPIError(Exception):
 
 
 class ShortIDAlreadyExistsError(Exception):
-    pass
+    """
+    Выбрасывается в случае, если невозможно создать короткую ссылку.
+    """
 
 
 class URLCreationError(Exception):
-    pass
+    """
+    Предназначается только для models.py.
+    Выбрасывается в случае, если цикл встретился с совпадением в БД.
+    На каждой итерации.
+    """
 
 
 @app.errorhandler(InvalidAPIError)

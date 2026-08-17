@@ -60,8 +60,10 @@ class URLMap(db.Model):
         else:
             short_id = custom
 
-            if (cls.get_short_id_from_db(short_id)
-               or short_id in FORBIDDEN_URL_NAME):
+            if (
+                cls.get_short_id_from_db(short_id)
+                or short_id in FORBIDDEN_URL_NAME
+            ):
                 raise ShortIDAlreadyExistsError()
 
         new_short_id = cls.db_object_creation(original_link, short_id)
@@ -78,4 +80,4 @@ class URLMap(db.Model):
             if not cls.get_short_id_from_db(short_id):
                 return short_id
 
-        raise URLCreationError()
+        raise URLCreationError('Не удалось сгенерировать уникальную короткую ссылку')

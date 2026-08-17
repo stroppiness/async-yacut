@@ -1,7 +1,8 @@
 import asyncio
 
 import aiohttp
-from flask import flash, redirect, render_template, url_for
+
+from flask import flash, redirect, render_template
 
 from . import app
 from .constants import (AUTH_HEADERS, DOWNLOAD_LINK_URL,
@@ -14,7 +15,6 @@ from .error_handlers import ShortIDAlreadyExistsError
 @app.route('/', methods=['GET', 'POST'])
 def index_view():
     form = YacutForm()
-    urlmap = None
 
     if form.validate_on_submit():
         try:
@@ -23,25 +23,22 @@ def index_view():
                 form.custom_id.data or None,
             )
 
+            return render_template(
+                'index.html',
+                short_link=urlmap.url_preparation(),
+                form=form
+            )
+
         except ShortIDAlreadyExistsError:
             flash('Предложенный вариант короткой ссылки уже существует.')
-            return render_template('index.html', form=form)
 
         except Exception:
             flash(
                 'Произошёл непредвиденный сбой при создании ссылки. '
                 'Попробуйте позже'
             )
-            return render_template('index.html', form=form)
 
-    return render_template(
-        'index.html',
-        short_link=(
-            url_for('redirect_view', short_id=urlmap.short, _external=True)
-            if urlmap else None
-        ),
-        form=form,
-    )
+    return render_template('index.html', form=form)
 
 
 @app.route('/<string:short_id>')
@@ -135,11 +132,7 @@ async def files_upload_view():
 
             results.append({
                 'filename': result['filename'],
-                'short_link': url_for(
-                    'redirect_view',
-                    short_id=short_id,
-                    _external=True,
-                ),
+                'short_link': short_id.url_preparation()
             })
 
     return render_template(
